@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8"><title>LocalSecretManager</title>
+<style>
+body{font-family:sans-serif;max-width:860px;margin:1em auto;padding:0 1em}
+fieldset{margin-bottom:1em}label{margin-right:1em}input[type=text]{margin:2px}
+td,th{padding:4px 8px;border-bottom:1px solid #ccc;text-align:left}#msg{color:#b00}
+</style></head><body>
+<h1>LocalSecretManager</h1><div id="msg"></div>
+
+<fieldset><legend>パスワード生成</legend>
+<label><input type="checkbox" id="gu" checked>大文字</label>
+<label><input type="checkbox" id="gl" checked>小文字</label>
+<label><input type="checkbox" id="gs" checked>記号</label>
+<label>最小長 <input type="number" id="gmin" value="8" min="1" style="width:4em"></label>
+<label>最大長 <input type="number" id="gmax" value="64" min="1" style="width:4em"></label>
+<button id="gen">生成</button> <code id="gout"></code>
+</fieldset>
+
+<fieldset><legend>登録</legend>
+<div>サイト名/アプリ名(必須) <input type="text" id="site"></div>
+<div>ユーザー名 <input type="text" id="user"></div>
+<div>キーワード(3個まで) <input type="text" class="kw"><input type="text" class="kw"><input type="text" class="kw"></div>
+<div>パスワード <input type="text" id="pw"> <button id="usegen">生成したパスワードを使う</button></div>
+<button id="save">登録</button>
+</fieldset>
+
+<fieldset><legend>検索</legend>
+<div id="conds"></div>
+<div>論理式(C言語スタイル 例: A&amp;&amp;(B||C)) <input type="text" id="expr" value="A" size="30"></div>
+<button id="search">検索</button>
+<table id="res"></table>
+</fieldset>
+
+<script>
+const $=id=>document.getElementById(id);
+const msg=t=>$('msg').textContent=t||'';
+async function api(path,body){
+  const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const j=await r.json(); if(!r.ok) throw new Error(j.error); return j;
+}
+const wrap=f=>async()=>{try{msg();await f()}catch(e){msg(e.message)}};
+'ABCDE'.split('').forEach(c=>{$('conds').insertAdjacentHTML('beforeend',
+  `${c}: <input type="text" id="c${c}" size="12"> `)});
+$('gen').onclick=wrap(async()=>{
+  $('gout').textContent=(await api('/api/generate',{upper:$('gu').checked,lower:$('gl').checked,
+    symbol:$('gs').checked,min:+$('gmin').value,max:+$('gmax').value})).password});
+$('usegen').onclick=()=>{$('pw').value=$('gout').textContent};
+$('save').onclick=wrap(async()=>{
+  await api('/api/entries',{site:$('site').value,username:$('user').value,password:$('pw').value,
+    keywords:[...document.querySelectorAll('.kw')].map(e=>e.value)});
+  msg('登録しました');$('pw').value='';
+});
+$('search').onclick=wrap(async()=>{
+  const conditions={};'ABCDE'.split('').forEach(c=>conditions[c]=$('c'+c).value);
+  const {results}=await api('/api/search',{conditions,expression:$('expr').value});
+  const t=$('res');t.innerHTML='<tr><th>サイト</th><th>ユーザー</th><th>キーワード</th><th>パスワード</th></tr>';
+  results.forEach(r=>{
+    const tr=t.insertRow();
+    [r.site,r.username,r.keywords.join(', '),r.password].forEach(v=>tr.insertCell().textContent=v);
+    const b=document.createElement('button');b.textContent='📋';b.title='コピー';
+    b.onclick=()=>navigator.clipboard.writeText(r.password);
+    tr.cells[3].append(' ',b);
+  });
+});
+</script></body></html>
