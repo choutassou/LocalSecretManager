@@ -5,7 +5,7 @@
 ## 起動
 ```
 pip install cryptography
-python server.py [port]   # http://127.0.0.1:8000
+python server.py [port]   # http://127.0.0.1:6300
 ```
 パスワードは `data/secret.key` の鍵でFernet暗号化され `data/secrets.db`(SQLite)に保存されます。鍵ファイルは大切に保管してください。
 
@@ -20,7 +20,7 @@ UIは React + TypeScript (Vite) で `frontend/` にあり、ビルド結果は `
 ```
 cd frontend
 npm install
-npm run dev     # 開発サーバー(/api は 127.0.0.1:8000 へプロキシ)
+npm run dev     # 開発サーバー(/api は 127.0.0.1:6300 へプロキシ)
 npm run build   # static/ を更新
 ```
 

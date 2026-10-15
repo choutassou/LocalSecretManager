@@ -16,7 +16,7 @@ mimetypes.add_type("text/css", ".css")
 
 
 def host_name(host):
-    """'127.0.0.1:8000' -> '127.0.0.1', '[::1]:8000' -> '[::1]'."""
+    """'127.0.0.1:6300' -> '127.0.0.1', '[::1]:6300' -> '[::1]'."""
     return host.rsplit(":", 1)[0] if not host.endswith("]") and ":" in host else host
 
 
@@ -98,12 +98,12 @@ def make_handler(store):
     return Handler
 
 
-def make_server(store, port=8000, host="127.0.0.1"):
+def make_server(store, port=6300, host="127.0.0.1"):
     return ThreadingHTTPServer((host, port), make_handler(store))
 
 
 if __name__ == "__main__":
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
+    port = int(sys.argv[1]) if len(sys.argv) > 1 else 6300
     data = os.environ.get("LSM_DATA_DIR", os.path.join(BASE, "data"))
     os.makedirs(data, exist_ok=True)
     store = Store(os.path.join(data, "secrets.db"), os.path.join(data, "secret.key"))
