@@ -148,6 +148,7 @@ table.entries { width: 100%; border-collapse: collapse; }
 .entries th:first-child, .entries td:first-child { padding-left: 24px; }
 .entries th:last-child, .entries td:last-child { padding-right: 20px; }
 .site { display: flex; align-items: center; gap: 12px; }
+.site strong { max-width: 100ch; overflow-wrap: anywhere; }
 .avatar {
   flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 9px;
   background: var(--primary-soft); color: var(--primary); font-weight: 700;
